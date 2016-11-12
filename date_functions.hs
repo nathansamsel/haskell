@@ -15,7 +15,11 @@ import Data.Generics.Text
 
 --returns true if second arg is older than first
 isOlder :: (Int, Int, Int) -> (Int, Int, Int) -> Bool
-isOlder (y1, m1, d1) (y2, m2, d2) = (y1 <= y2 && m1 <= m2 && d1 < d2)
+isOlder (y1, m1, d1) (y2, m2, d2)
+        | y1 < y2 = True
+        | y1 == y2 && m1 < m2 = True
+        | y1 == y2 && m1 == m2 && d1 < d2 = True
+        | otherwise = False
 
 --returns the number of dates from the given list in the given month
 numberInMonth :: [(Int, Int, Int)] -> Int -> Int
@@ -47,7 +51,7 @@ dateToString (y1, m1, d1) = let
 
 --returns the count of items 1 before the sum of those exceed the given sum limit
 numberBeforeReachingSum :: Int -> [Int] -> Int
-numberBeforeReachingSum sum1 intList = foldl (\n i -> if (sum (take n intList)) >= sum1 then n else n+1) 0 intList
+numberBeforeReachingSum sum1 intList = foldl (\n i -> if (sum (take n intList)) >= sum1 then n-1 else n+1) 0 intList
 
 --returns int of month that day input (1-365) is in
 whatMonth :: Int -> Int
@@ -68,7 +72,12 @@ oldest :: [(Int, Int, Int)] -> Maybe (Int, Int, Int)
 oldest [] = Nothing
 oldest dateList = Just (minimum dateList)
 
---NOT FINISHED
---returns true if date is valid, false otherwise
+--returns true if date is valid and false if not
 validDate :: (Int, Int, Int) -> Bool
-validDate (y, m, d) = if (y > 0 && m > 0 && m <= 12 || ((y `mod` 400) == 0 || (y `mod` 4) == 0) || (y `mod` 100) /= 0) then True else False
+validDate (y1, m1, d1) = let
+            day = d1
+            month = m1
+            year = y1
+            monthList = [31,28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
+            in 
+            ((day <= (monthList !! (month-1)) || (day <= 29 && month == 2 && ((year `mod` 400 == 0) || (year `mod` 4 == 0 && year `mod` 100 /= 0)))) && (month <= 12) && (year>0)) 
